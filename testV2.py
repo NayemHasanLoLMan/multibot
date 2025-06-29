@@ -22,7 +22,7 @@ xai_url = "https://api.x.ai/v1"
 deepseek_model = "deepseek-chat"
 xai_model = "grok-3"
 
-
+max_tokens = 3000
 
 def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
     if chat_history is None:
@@ -49,6 +49,7 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
 
         response_obj = client.chat.completions.create(
             model=deepseek_model,
+            max_tokens=max_tokens,
             messages=deepseek_messages,
             stream=False
         )
@@ -88,6 +89,7 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
 
         response_obj = client.chat.completions.create(
         model=xai_model,
+        max_tokens=max_tokens,
         messages=xai_messages
         )
 
