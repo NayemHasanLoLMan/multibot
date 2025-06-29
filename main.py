@@ -1,19 +1,30 @@
 from typing import List, Dict
 from anthropic import Anthropic
 import google.generativeai as genai
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 import os
 from anthropic._exceptions import AuthenticationError as ClaudeAuthError
-from openai.error import AuthenticationError as OpenAIAuthError
+from openai import AuthenticationError as OpenAIAuthError
+import json
 
 # Load environment variables from .env file
 load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-genai_model = genai.GenerativeModel('gemini-2.0-flash')
 anthropic_client = Anthropic(api_key=os.getenv("CLAUDE_API_KEY"))
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+
+
+
+genai_model = genai.GenerativeModel('gemini-2.0-flash')
+claude_model = "claude-3-5-sonnet-20241022"
+chatgpt_model = "gpt-4-turbo"
+
+
+max_tokens = 3000
+
 
 def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
     if chat_history is None:
@@ -35,8 +46,8 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
         claude_messages.append({"role": "user", "content": input_text})
         
         response_obj = anthropic_client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=2500,
+            model= claude_model,
+            max_tokens=max_tokens,
             messages=claude_messages
         )
         claude_response = response_obj.content[0].text if response_obj and response_obj.content else "No response generated."
@@ -60,13 +71,15 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
         
         # Add current input
         chatgpt_messages.append({"role": "user", "content": input_text})
+
+        client = OpenAI(api_key=openai_api_key)
         
-        response_obj = openai.ChatCompletion.create(
-            model="gpt-4-turbo",
-            max_tokens=2500,
+        response_obj = client.chat.completions.create(
+            model=chatgpt_model,
+            max_tokens=max_tokens,
             messages=chatgpt_messages
         )
-        chatgpt_response = response_obj['choices'][0]['message']['content'] if 'choices' in response_obj else "No response generated."
+        chatgpt_response = response_obj.choices[0].message.content if response_obj and response_obj.choices else "No response generated."
         
     except OpenAIAuthError:
         chatgpt_response = "Invalid OpenAI API key."
@@ -90,7 +103,7 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
         
         response_obj = genai_model.generate_content(
             conversation_context,
-            generation_config={"max_output_tokens": 2500}
+            generation_config={"max_output_tokens": max_tokens}
         )
         gemini_response = response_obj.text if response_obj else "No response generated."
         
@@ -102,7 +115,7 @@ def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:
     return responses
 
 if __name__ == "__main__":
-    input_text = "what is the newton law of motion?"
+    input_text = "hello"
 
     # Simulate backend-provided chat history
     chat_history = [
@@ -115,4 +128,5 @@ if __name__ == "__main__":
     ] 
     
     result = generate_response(input_text, chat_history)
-    print(f"Response: {result}")
+    json_output = json.dumps(result, indent=2, ensure_ascii=False)
+    print(json_output)
