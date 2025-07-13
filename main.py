@@ -22,7 +22,7 @@ xai_api_key = os.getenv("XAI_API_KEY")
 genai_model = genai.GenerativeModel('gemini-2.0-flash')
 claude_model = "claude-3-5-sonnet-20241022"
 chatgpt_model = "gpt-4-turbo"
-deepseek_model = "deepseek-chat"
+deepseek_model = "deepseek/deepseek-chat-v3-0324"
 xai_model = "x-ai/grok-3"
 
 
@@ -31,7 +31,7 @@ deepseek_url = os.environ.get("DEEPSEEK_URL")
 xai_url = os.environ.get("XAI_URL")
 
 
-max_tokens = 1600
+max_tokens = 500
 
 
 def generate_response(input_text: str, chat_history: List[Dict] = None) -> Dict:

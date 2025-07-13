@@ -5,7 +5,7 @@ import openai
 from dotenv import load_dotenv
 import os
 from anthropic._exceptions import AuthenticationError as ClaudeAuthError
-from openai.error import AuthenticationError as OpenAIAuthError
+from openai import AuthenticationError as OpenAIAuthError
 import time
 
 import atexit
